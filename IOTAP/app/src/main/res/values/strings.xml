@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name" translatable="false">IOTAP</string>
+
+    <!-- MainActivity -->
+    <string name="connected">Connected</string>
+    <string name="connecting">Connecting ...</string>
+    <string name="disconnected">Disconnected</string>
+
+    <!-- DeviceActivity -->
+    <string name="paired_devices">Paired devices:</string>
+    <string name="found_devices">Found devices:</string>
+
+    <!-- Actions -->
+    <string name="action_refresh">Refresh</string>
+    <string name="action_bluetooth">Choose device</string>
+
+    <!-- Errors -->
+    <string name="err_dialog_title">Error !</string>
+    <string name="default_err_msg">Something went wrong :(</string>
+    <string name="nobt_err_msg">No Bluetooth detected on this device</string>
+    <string name="btdisabled_err_msg">Bluetooth is disabled</string>
+    <string name="noallowed_err_msg">Not allowed to detect nearby devices</string>
+    <string name="connection_err_msg">Unable to connect</string>
+</resources>
