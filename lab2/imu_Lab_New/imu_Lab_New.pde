@@ -16,7 +16,7 @@ import wekaizing.*;
 WekaData mydata;
 WekaClassifier classifier;
 String trainPath = "/Users/ag6031/Downloads/imu_Lab 3/imu_Lab_New/train_b.arff";
-String lable = "tilt_left";
+String lable = "tilt_right";
 int counter = 1;
 int counterg = 0;
 
