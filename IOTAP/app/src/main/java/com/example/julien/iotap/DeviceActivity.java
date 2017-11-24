@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +41,7 @@ public class DeviceActivity extends AppCompatActivity {
     ListView m_foundlist_view;
     Toolbar m_toolbar;
 
+    boolean m_registred = false;
     BroadcastReceiver m_bluetoothreceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -102,10 +104,16 @@ public class DeviceActivity extends AppCompatActivity {
                 }
 
                 break;
+        }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
             case REQUEST_ACCESS_COARSE_LOCATION:
                 if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     new ErrorFragment().setMsg(R.string.noallowed_err_msg).show(getFragmentManager(), "error_dialog");
+                    finish();
                 } else {
                     btEnable();
                 }
@@ -143,13 +151,14 @@ public class DeviceActivity extends AppCompatActivity {
             Log.i("Discovery", "Unable to stop discovery");
         }
 
-        unregisterReceiver(m_bluetoothreceiver);
+        if (m_registred) unregisterReceiver(m_bluetoothreceiver);
     }
 
     // Méthods
     private void btEnable() {
         // Register receiver for bluetooth discovery
         registerReceiver(m_bluetoothreceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        m_registred = true;
 
         // Enable bluetooth
         if (!m_BluetoothAdapter.isEnabled()) {
