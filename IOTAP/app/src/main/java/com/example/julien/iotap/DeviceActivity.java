@@ -45,22 +45,35 @@ public class DeviceActivity extends AppCompatActivity {
     BroadcastReceiver m_bluetoothreceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            BluetoothDevice bd = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-            boolean exist = false;
-            for (BluetoothDevice b : m_founddevices) {
-                if (b.getAddress().equals(bd.getAddress())) {
-                    exist = true;
-                    break;
-                }
+            switch (intent.getAction()) {
+                case BluetoothDevice.ACTION_FOUND:
+                    boolean exist = false;
+                    for (BluetoothDevice b : m_founddevices) {
+                        if (b.getAddress().equals(device.getAddress())) {
+                            exist = true;
+                            break;
+                        }
+                    }
+
+                    if (!exist) {
+                        m_founddevices.add(device);
+                        m_foundlist_view.setAdapter(new BtAdapter(m_founddevices));
+                    }
+
+                    Log.i("Discovery", String.format("Found %s on %s", device.getName(), device.getAddress()));
+
+                case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
+                    // If bond ok : return the device
+                    if (intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE) == BluetoothDevice.BOND_BONDED) {
+                        Intent data = new Intent();
+                        data.putExtra(MainActivity.BLUETOOTH_DEVICE, device);
+
+                        DeviceActivity.this.setResult(RESULT_OK, data);
+                        DeviceActivity.this.finish();
+                    }
             }
-
-            if (!exist) {
-                m_founddevices.add(bd);
-                m_foundlist_view.setAdapter(new BtAdapter(m_founddevices));
-            }
-
-            Log.i("Discovery", String.format("Found %s on %s", bd.getName(), bd.getAddress()));
         }
     };
 
@@ -157,7 +170,11 @@ public class DeviceActivity extends AppCompatActivity {
     // Méthods
     private void btEnable() {
         // Register receiver for bluetooth discovery
-        registerReceiver(m_bluetoothreceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+
+        registerReceiver(m_bluetoothreceiver, filter);
         m_registred = true;
 
         // Enable bluetooth
@@ -176,6 +193,8 @@ public class DeviceActivity extends AppCompatActivity {
 
         // Start discovery
         m_founddevices.clear();
+        m_foundlist_view.setAdapter(new BtAdapter(m_founddevices));
+
         if (m_BluetoothAdapter.startDiscovery()) {
             Log.i("Discovery", "Discovery started");
         } else {
@@ -189,10 +208,19 @@ public class DeviceActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
             BluetoothDevice device = (BluetoothDevice) adapterView.getAdapter().getItem(pos);
 
-            Intent data = new Intent();
-            data.putExtra(MainActivity.BLUETOOTH_DEVICE, device);
-            setResult(RESULT_OK, data);
-            finish();
+            // If paired return it else ask for bond
+            if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                Log.d("DeviceActivity", "Already bond with " + device.getAddress());
+
+                Intent data = new Intent();
+                data.putExtra(MainActivity.BLUETOOTH_DEVICE, device);
+
+                setResult(RESULT_OK, data);
+                finish();
+            } else {
+                Log.d("DeviceActivity", "Ask to bond with " + device.getAddress());
+                device.createBond();
+            }
         }
     }
 

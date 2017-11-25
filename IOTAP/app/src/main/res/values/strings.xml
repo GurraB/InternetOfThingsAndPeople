@@ -1,16 +1,19 @@
 <resources>
     <string name="app_name" translatable="false">IOTAP</string>
+    <string name="rfcomm_uuid" translatable="false">0001101-0000-1000-8000-00805F9B34FB</string>
 
-    <!-- MainActivity -->
-    <string name="connected">Connected</string>
+    <!-- ConnectionFragment -->
+    <string name="no_device">No device selected</string>
+    <string name="connect">Connect</string>
     <string name="connecting">Connecting ...</string>
-    <string name="disconnected">Disconnected</string>
+    <string name="disconnect">Disconnect</string>
 
     <!-- DeviceActivity -->
     <string name="paired_devices">Paired devices:</string>
     <string name="found_devices">Found devices:</string>
 
     <!-- Actions -->
+    <string name="action_train">Train</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_bluetooth">Choose device</string>
 

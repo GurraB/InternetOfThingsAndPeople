@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Connection Fragment -->
+    <string name="no_device">Pas de périférique sélectionné</string>
+    <string name="connect">Connecter</string>
+    <string name="connecting">Connection ...</string>
+    <string name="disconnect">Déconnecter</string>
+
     <!-- DeviceActivity -->
     <string name="paired_devices">Périfériques associés :</string>
     <string name="found_devices">Périfériques trouvés :</string>
 
-    <!-- Erreurs -->
+    <!-- Actions -->
+    <string name="action_train">Entraîner</string>
+    <string name="action_refresh">Rafraichir</string>
+    <string name="action_bluetooth">Sélection du périférique</string>
+
+    <!-- Errors -->
     <string name="err_dialog_title">Erreur !</string>
     <string name="default_err_msg">Une erreur a eu lieu :(</string>
     <string name="nobt_err_msg">Pas de Bluetooth sur ce périférique</string>
     <string name="btdisabled_err_msg">Le Bluetooth est desactivé</string>
-    <string name="connected">Connecté</string>
-    <string name="connecting">Connection ...</string>
-    <string name="disconnected">Déconnecté</string>
-    <string name="action_refresh">Rafraichir</string>
     <string name="connection_err_msg">Connection impossible</string>
-    <string name="action_bluetooth">Sélection du périférique</string>
     <string name="noallowed_err_msg">Non authorisé à détecter les périfériques environnants</string>
 </resources>
