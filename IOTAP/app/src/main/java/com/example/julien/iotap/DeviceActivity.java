@@ -68,7 +68,7 @@ public class DeviceActivity extends AppCompatActivity {
                     // If bond ok : return the device
                     if (intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE) == BluetoothDevice.BOND_BONDED) {
                         Intent data = new Intent();
-                        data.putExtra(MainActivity.BLUETOOTH_DEVICE, device);
+                        data.putExtra(ConnectionFragment.BLUETOOTH_DEVICE, device);
 
                         DeviceActivity.this.setResult(RESULT_OK, data);
                         DeviceActivity.this.finish();
@@ -126,7 +126,6 @@ public class DeviceActivity extends AppCompatActivity {
             case REQUEST_ACCESS_COARSE_LOCATION:
                 if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     new ErrorFragment().setMsg(R.string.noallowed_err_msg).show(getFragmentManager(), "error_dialog");
-                    finish();
                 } else {
                     btEnable();
                 }
@@ -147,6 +146,10 @@ public class DeviceActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_refresh:
                 updateBtLists();
+                return true;
+
+            case android.R.id.home:
+                finish();
                 return true;
 
             default:
@@ -213,7 +216,7 @@ public class DeviceActivity extends AppCompatActivity {
                 Log.d("DeviceActivity", "Already bond with " + device.getAddress());
 
                 Intent data = new Intent();
-                data.putExtra(MainActivity.BLUETOOTH_DEVICE, device);
+                data.putExtra(ConnectionFragment.BLUETOOTH_DEVICE, device);
 
                 setResult(RESULT_OK, data);
                 finish();

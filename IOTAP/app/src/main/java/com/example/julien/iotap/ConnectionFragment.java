@@ -25,6 +25,9 @@ import java.util.UUID;
  */
 
 public class ConnectionFragment extends Fragment {
+    // Constants
+    public static final String BLUETOOTH_DEVICE = "com.example.julien.iotap.MainActivity.BLUETOOTH_DEVICE";
+
     // Attributes
     OnReceiveListener m_listener;
     BluetoothDevice m_device;
@@ -80,6 +83,12 @@ public class ConnectionFragment extends Fragment {
             }
         });
 
+        // Get saved device
+        if (savedInstanceState != null) {
+            m_device = (BluetoothDevice) savedInstanceState.getParcelable(BLUETOOTH_DEVICE);
+            refresh_device_name();
+        }
+
         return layout;
     }
 
@@ -93,10 +102,22 @@ public class ConnectionFragment extends Fragment {
         disconnect();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save bluetooth device
+        outState.putParcelable(BLUETOOTH_DEVICE, m_device);
+    }
+
     // Méthods
-    void setDevice(BluetoothDevice device) {
+    public void setDevice(BluetoothDevice device) {
         m_device = device;
         refresh_device_name();
+    }
+
+    public BluetoothDevice getDevice() {
+        return m_device;
     }
 
     private void refresh_device_name() {

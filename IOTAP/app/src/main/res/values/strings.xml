@@ -21,6 +21,7 @@
     <string name="err_dialog_title">Error !</string>
     <string name="default_err_msg">Something went wrong :(</string>
     <string name="nobt_err_msg">No Bluetooth detected on this device</string>
+    <string name="no_dev_sel_err_msg">No Bluetooth device selected</string>
     <string name="btdisabled_err_msg">Bluetooth is disabled</string>
     <string name="noallowed_err_msg">Not allowed to detect nearby devices</string>
     <string name="connection_err_msg">Unable to connect</string>

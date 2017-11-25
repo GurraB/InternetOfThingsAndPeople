@@ -2,23 +2,15 @@ package com.example.julien.iotap;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.UUID;
 
 /**
  * Created by julien on 17/11/17.
@@ -29,8 +21,6 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity implements ConnectionFragment.OnReceiveListener {
     // Constants
     public static final int DEVICE_ACTIVITY = 1;
-
-    public static final String BLUETOOTH_DEVICE = "com.example.julien.iotap.MainActivity.BLUETOOTH_DEVICE";
 
     // Attributes
     BluetoothAdapter m_BluetoothAdapter;
@@ -53,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         m_raw_data = findViewById(R.id.raw_data);
 
         // Get fragments
-        m_connection_manager = (ConnectionFragment) getFragmentManager().findFragmentById(R.id.connection_manager);
+        m_connection_manager = (ConnectionFragment) getFragmentManager().findFragmentById(R.id.main_connection_manager);
 
         // Setup toolbar
         setSupportActionBar(m_toolbar);
@@ -90,7 +80,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                 return true;
 
             case R.id.action_train:
-                startActivity(new Intent(this, TrainActivity.class));
+                Intent intent = new Intent(this, TrainActivity.class);
+                intent.putExtra(ConnectionFragment.BLUETOOTH_DEVICE, m_connection_manager.getDevice());
+
+                startActivity(intent);
                 return true;
 
             default:
@@ -103,8 +96,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         switch (requestCode) {
             case DEVICE_ACTIVITY:
                 if (resultCode == RESULT_OK) {
-                    m_connection_manager.setDevice((BluetoothDevice) data.getParcelableExtra(BLUETOOTH_DEVICE));
-                    m_connection_manager.connect();
+                    m_connection_manager.setDevice((BluetoothDevice) data.getParcelableExtra(ConnectionFragment.BLUETOOTH_DEVICE));
                 }
 
                 break;
