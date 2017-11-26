@@ -6,7 +6,26 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Created by julien on 24/11/17.
@@ -20,8 +39,13 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
 
     // Attributes
     Toolbar m_toolbar;
+    ToggleButton m_train_button;
+    TextView m_content;
+    Spinner m_gesture;
 
     ConnectionFragment m_connection_manager;
+    ArrayList<String> m_buffer = new ArrayList<>();
+    File m_train_file;
 
     // Events
     @Override
@@ -32,6 +56,9 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
 
         // Get Views
         m_toolbar = findViewById(R.id.train_toolbar);
+        m_train_button = findViewById(R.id.train_button);
+        m_content = findViewById(R.id.content);
+        m_gesture = findViewById(R.id.gesture_spinner);
 
         // Get Fragments
         m_connection_manager = (ConnectionFragment) getFragmentManager().findFragmentById(R.id.train_connection_manager);
@@ -39,6 +66,35 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
         // Setup toolbar
         setSupportActionBar(m_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Setup listener
+        m_train_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                m_gesture.setEnabled(!m_train_button.isChecked());
+            }
+        });
+
+        // Open train file
+        m_train_file = new File(getFilesDir(), TRAIN_FILE);
+        try {
+            if (m_train_file.createNewFile()) {
+                // Init file
+                BufferedOutputStream sw = new BufferedOutputStream(new FileOutputStream(m_train_file));
+
+                for (int i = 1; i <= 20; ++i) {
+                    sw.write(String.format("AccX%1$s,AccY%1$s,AccZ%1$s,GyrX%1$s,GyrY%1$s,GyrZ%1$s,", i).getBytes());
+                }
+
+                sw.write(String.format("Label%n").getBytes());
+                sw.flush();
+                sw.close();
+            }
+        } catch (IOException err) {
+            Log.e("TrainActivity", "Unable to create train file", err);
+        }
+
+        updateContent();
     }
 
     @Override
@@ -57,13 +113,48 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
     }
 
     @Override
-    public void onReceive(String data) {
-
+    public void onConnect() {
+        m_train_button.setEnabled(true);
     }
 
     @Override
-    public void onConnect() {
+    public void onReceive(String data) {
+        if (m_train_button.isChecked()) {
+            m_buffer.add(data);
 
+            if (m_buffer.size() == 20) {
+                try {
+                    BufferedOutputStream sw = new BufferedOutputStream(new FileOutputStream(m_train_file, true));
+
+                    // Write data
+                    for (int i = 0; i < 20; ++i) {
+                        sw.write(String.format("%s,", m_buffer.get(i).substring(2)).getBytes());
+                    }
+
+                    // Add label
+                    String label = (String) m_gesture.getSelectedItem();
+                    sw.write(String.format("\"%s\"%n", label).getBytes());
+
+                    // Close stream
+                    sw.flush();
+                    sw.close();
+
+                    m_buffer.clear();
+                } catch (Exception err) {
+                    Log.e("TrainActivity", "Unable to write to train file", err);
+                }
+
+                updateContent();
+            }
+        }
+    }
+
+    @Override
+    public void onDisconnect() {
+        m_train_button.setEnabled(false);
+        m_train_button.setChecked(false);
+        m_gesture.setEnabled(true);
+        m_buffer.clear();
     }
 
     @Override
@@ -75,6 +166,41 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
 
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    // Méthods
+    private void updateContent() {
+        final String[] gestures = getResources().getStringArray(R.array.gestures);
+        HashMap<String,Integer> stats = new HashMap<>();
+        int nb_lines = 0;
+
+        // Init stats
+        for (int i = 0; i < gestures.length; ++i) {
+            stats.put(gestures[i], 0);
+        }
+
+        try {
+            BufferedReader sr = new BufferedReader(new FileReader(m_train_file));
+            sr.readLine(); // Skip the 1st one
+
+            while (true) {
+                String s = sr.readLine();
+                if (s == null) break;
+
+                // Extract label
+                String label = s.substring(s.indexOf('"')+1, s.lastIndexOf('"'));
+                stats.put(label, stats.get(label)+1);
+                ++nb_lines;
+            }
+
+            // Print on screen
+            m_content.setText("File Contents :");
+            for (int i = 0; i < gestures.length; ++i) {
+                m_content.append(String.format("%n%s : %s", gestures[i], stats.get(gestures[i])));
+            }
+        } catch (Exception err) {
+            Log.e("TrainActivity", "Unable to read train file", err);
         }
     }
 }

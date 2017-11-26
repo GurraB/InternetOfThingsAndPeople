@@ -136,9 +136,6 @@ public class ConnectionFragment extends Fragment {
     public void connect() {
         if (m_device == null) return;
 
-        // Clean screen
-        m_listener.onConnect();
-
         // Start connection process
         dev_connection = new DeviceConnection();
         dev_connection.execute();
@@ -161,6 +158,7 @@ public class ConnectionFragment extends Fragment {
     interface OnReceiveListener {
         void onConnect();
         void onReceive(String data);
+        void onDisconnect();
     }
 
     // Subclasses
@@ -202,6 +200,8 @@ public class ConnectionFragment extends Fragment {
                     m_status.setImageResource(R.drawable.ic_bluetooth_connected_black_36dp);
                     m_connection_btn.setText(R.string.disconnect);
                     m_connection_btn.setEnabled(true);
+
+                    m_listener.onConnect();
                     break;
 
                 case CONNECTING:
@@ -217,6 +217,8 @@ public class ConnectionFragment extends Fragment {
                     m_status.setImageResource(R.drawable.ic_bluetooth_disabled_black_36dp);
                     m_connection_btn.setText(R.string.connect);
                     m_connection_btn.setEnabled(true);
+
+                    m_listener.onDisconnect();
                     break;
             }
         }

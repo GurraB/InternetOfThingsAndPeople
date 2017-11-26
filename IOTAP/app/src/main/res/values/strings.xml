@@ -11,6 +11,19 @@
     <!-- DeviceActivity -->
     <string name="paired_devices">Paired devices:</string>
     <string name="found_devices">Found devices:</string>
+    
+    <!-- TrainActivity -->
+    <string name="start_training">Train</string>
+    <string name="stop_training">Stop</string>
+    <string name="gesture_text">Gesture:</string>
+    <string-array name="gestures">
+        <item>up</item>
+        <item>down</item>
+        <item>right</item>
+        <item>left</item>
+        <item>tilt right</item>
+        <item>tilt left</item>
+    </string-array>
 
     <!-- Actions -->
     <string name="action_train">Train</string>

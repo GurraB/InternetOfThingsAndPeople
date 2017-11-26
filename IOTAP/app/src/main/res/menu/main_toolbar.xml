@@ -10,7 +10,7 @@
 
     <item
         android:id="@+id/action_train"
-        android:icon="@drawable/ic_school_white_48dp"
+        android:icon="@drawable/ic_fitness_center_white_48dp"
         android:title="@string/action_train"
         app:showAsAction="ifRoom"/>
 </menu>
