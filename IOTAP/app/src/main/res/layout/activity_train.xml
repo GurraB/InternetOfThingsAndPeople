@@ -43,7 +43,8 @@
         android:paddingEnd="0dp"
         android:text="@string/gesture_text"
         android:textColor="@android:color/black"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/space"
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <Spinner
         android:id="@+id/gesture_spinner"
@@ -52,7 +53,7 @@
         android:padding="14dp"
         android:paddingStart="8dp"
         android:entries="@array/gestures"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/space"
         app:layout_constraintStart_toEndOf="@id/gesture_text"/>
 
     <ToggleButton
@@ -63,8 +64,25 @@
         android:enabled="false"
         android:textOn="@string/stop_training"
         android:textOff="@string/start_training"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/space"
         app:layout_constraintStart_toEndOf="@id/gesture_spinner"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        app:layout_constraintBottom_toTopOf="@id/reset_button" />
+
+    <Button
+        android:id="@+id/reset_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/reset_button"
+        android:backgroundTint="@android:color/holo_red_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

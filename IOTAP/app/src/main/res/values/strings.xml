@@ -8,6 +8,9 @@
     <string name="connecting">Connecting ...</string>
     <string name="disconnect">Disconnect</string>
 
+    <!-- ResetConfirmFragment -->
+    <string name="reset_msg">You'll lose all training file's content</string>
+
     <!-- DeviceActivity -->
     <string name="paired_devices">Paired devices:</string>
     <string name="found_devices">Found devices:</string>
@@ -15,6 +18,7 @@
     <!-- TrainActivity -->
     <string name="start_training">Train</string>
     <string name="stop_training">Stop</string>
+    <string name="reset_button">Reset</string>
     <string name="gesture_text">Gesture:</string>
     <string-array name="gestures">
         <item>up</item>

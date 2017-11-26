@@ -6,12 +6,17 @@
     <string name="connecting">Connection ...</string>
     <string name="disconnect">Déconnecter</string>
 
+    <!-- ResetConfirmFragment -->
+    <string name="reset_msg">Vous allez perdre tout le contenu du fichier !</string>
+
     <!-- DeviceActivity -->
     <string name="paired_devices">Périfériques associés :</string>
     <string name="found_devices">Périfériques trouvés :</string>
 
     <!-- TrainActivity -->
     <string name="start_training">Entrainer</string>
+    <string name="stop_training">Arrêter</string>
+    <string name="reset_button">Effacer</string>
     <string name="gesture_text">Mouvement :</string>
     <string-array name="gestures">
         <item>haut</item>

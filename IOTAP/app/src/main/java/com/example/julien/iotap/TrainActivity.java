@@ -2,6 +2,7 @@ package com.example.julien.iotap;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -33,7 +35,7 @@ import java.util.function.Consumer;
  * Activity that creates and manage the content of the "train file"
  */
 
-public class TrainActivity extends AppCompatActivity implements ConnectionFragment.OnReceiveListener {
+public class TrainActivity extends AppCompatActivity implements ConnectionFragment.OnReceiveListener, ResetConfirmFragment.OnResetListener {
     // Constants
     public static final String TRAIN_FILE = "train.csv";
 
@@ -42,6 +44,7 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
     ToggleButton m_train_button;
     TextView m_content;
     Spinner m_gesture;
+    Button m_reset_button;
 
     ConnectionFragment m_connection_manager;
     ArrayList<String> m_buffer = new ArrayList<>();
@@ -59,6 +62,7 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
         m_train_button = findViewById(R.id.train_button);
         m_content = findViewById(R.id.content);
         m_gesture = findViewById(R.id.gesture_spinner);
+        m_reset_button = findViewById(R.id.reset_button);
 
         // Get Fragments
         m_connection_manager = (ConnectionFragment) getFragmentManager().findFragmentById(R.id.train_connection_manager);
@@ -67,7 +71,7 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
         setSupportActionBar(m_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Setup listener
+        // Setup listeners
         m_train_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,21 +79,17 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
             }
         });
 
+        m_reset_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new ResetConfirmFragment().show(getFragmentManager(), "reset_confirm_dialog");
+            }
+        });
+
         // Open train file
         m_train_file = new File(getFilesDir(), TRAIN_FILE);
         try {
-            if (m_train_file.createNewFile()) {
-                // Init file
-                BufferedOutputStream sw = new BufferedOutputStream(new FileOutputStream(m_train_file));
-
-                for (int i = 1; i <= 20; ++i) {
-                    sw.write(String.format("AccX%1$s,AccY%1$s,AccZ%1$s,GyrX%1$s,GyrY%1$s,GyrZ%1$s,", i).getBytes());
-                }
-
-                sw.write(String.format("Label%n").getBytes());
-                sw.flush();
-                sw.close();
-            }
+            if (m_train_file.createNewFile()) initFile();
         } catch (IOException err) {
             Log.e("TrainActivity", "Unable to create train file", err);
         }
@@ -158,6 +158,17 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
     }
 
     @Override
+    public void onReset() {
+        try {
+            initFile();
+        } catch (IOException err) {
+            Log.e("TrainActivity", "Unable to reset train file", err);
+        }
+
+        updateContent();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -170,6 +181,19 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
     }
 
     // Méthods
+    private void initFile() throws IOException {
+        // Init file
+        BufferedOutputStream sw = new BufferedOutputStream(new FileOutputStream(m_train_file));
+
+        for (int i = 1; i <= 20; ++i) {
+            sw.write(String.format("AccX%1$s,AccY%1$s,AccZ%1$s,GyrX%1$s,GyrY%1$s,GyrZ%1$s,", i).getBytes());
+        }
+
+        sw.write(String.format("Label%n").getBytes());
+        sw.flush();
+        sw.close();
+    }
+
     private void updateContent() {
         final String[] gestures = getResources().getStringArray(R.array.gestures);
         HashMap<String,Integer> stats = new HashMap<>();
