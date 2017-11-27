@@ -27,6 +27,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="end"
         android:padding="16dp"
+        android:enabled="false"
         android:text="@string/connect"/>
 
 </LinearLayout>

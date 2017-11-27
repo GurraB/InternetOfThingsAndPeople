@@ -3,14 +3,22 @@ package com.example.julien.iotap;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import java.io.File;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.BayesNet;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils;
 
 /**
  * Created by julien on 17/11/17.
@@ -24,6 +32,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
 
     // Attributes
     BluetoothAdapter m_BluetoothAdapter;
+    Classifier m_classifier;
+    WekaTask m_weka_task;
+    File m_train_file;
 
     Toolbar m_toolbar;
     TextView m_device_name;
@@ -53,6 +64,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         if (m_BluetoothAdapter == null) {
             new ErrorFragment().setMsg(R.string.nobt_err_msg).show(getFragmentManager(), "error_dialog");
         }
+
+        // Init Weka
+        m_train_file = new File(getFilesDir(), TrainActivity.TRAIN_FILE);
+        if (m_train_file.exists()) initWeka();
     }
 
     @Override
@@ -62,7 +77,11 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
 
     @Override
     public void onReceive(String data) {
-        m_raw_data.setText(data + '\n' + m_raw_data.getText());
+        if (data.matches("h,(-?\\d,){6}")) {
+            m_raw_data.setText("mvt : " + data + '\n' + m_raw_data.getText());
+        } else {
+            m_raw_data.setText(data + '\n' + m_raw_data.getText());
+        }
     }
 
     @Override
@@ -105,6 +124,45 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                 }
 
                 break;
+        }
+    }
+
+    // Méthods
+    void initWeka() {
+        if (m_weka_task != null) return;
+        if (!m_train_file.exists()) return;
+
+        // Start wekatask
+        m_weka_task = new WekaTask();
+        m_weka_task.execute();
+    }
+
+    // Subclasses
+    class WekaTask extends AsyncTask<Object,Object,Object> {
+        // Events
+        @Override
+        protected Object doInBackground(Object... objects) {
+            // Loads train file
+            Instances data;
+
+            try {
+                ConverterUtils.DataSource source = new ConverterUtils.DataSource(m_train_file.getAbsolutePath());
+                data = source.getDataSet();
+                data.setClassIndex(data.numAttributes() - 1); // Last attribute => LABEL
+            } catch (Exception err) {
+                Log.e("WekaTask", "Unable to load train file", err);
+                return null;
+            }
+
+            // Initialize classifier
+            try {
+                m_classifier = new BayesNet();
+                m_classifier.buildClassifier(data);
+            } catch (Exception err) {
+                Log.e("WekaTask", "Unable to build classifier", err);
+            }
+
+            return null;
         }
     }
 }

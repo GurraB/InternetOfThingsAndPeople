@@ -16,8 +16,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.UUID;
 
 /**
@@ -121,6 +123,8 @@ public class ConnectionFragment extends Fragment {
     }
 
     private void refresh_device_name() {
+        m_connection_btn.setEnabled(m_device != null);
+
         if (m_device == null) return;
 
         // Name
@@ -235,6 +239,14 @@ public class ConnectionFragment extends Fragment {
     class DeviceConnected extends AsyncTask<Object,String,Object> {
         @Override
         protected Object doInBackground(Object... objects) {
+            try {
+                BufferedWriter stream = new BufferedWriter(new OutputStreamWriter(m_socket.getOutputStream()));
+                stream.write("w20", 0, 3);
+                stream.flush();
+            } catch (IOException err) {
+                Log.e("ConnectionFragment", "Error while sending", err);
+            }
+
             try {
                 m_stream = new BufferedReader(new InputStreamReader(m_socket.getInputStream()));
                 while (true) {

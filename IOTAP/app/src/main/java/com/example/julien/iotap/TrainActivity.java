@@ -2,7 +2,6 @@ package com.example.julien.iotap;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -18,16 +17,11 @@ import android.widget.ToggleButton;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Created by julien on 24/11/17.
@@ -128,7 +122,7 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
 
                     // Write data
                     for (int i = 0; i < 20; ++i) {
-                        sw.write(String.format("%s,", m_buffer.get(i).substring(2)).getBytes());
+                        sw.write(m_buffer.get(i).substring(2).getBytes());
                     }
 
                     // Add label

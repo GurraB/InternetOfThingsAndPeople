@@ -18,14 +18,6 @@
     <string name="stop_training">Arrêter</string>
     <string name="reset_button">Effacer</string>
     <string name="gesture_text">Mouvement :</string>
-    <string-array name="gestures">
-        <item>haut</item>
-        <item>bas</item>
-        <item>droite</item>
-        <item>gauche</item>
-        <item>poignet droite</item>
-        <item>poignet gauche</item>
-    </string-array>
 
     <!-- Actions -->
     <string name="action_train">Entraîner</string>

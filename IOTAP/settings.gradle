@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':weka-android-release'
