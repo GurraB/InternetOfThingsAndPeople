@@ -239,9 +239,11 @@ public class ConnectionFragment extends Fragment {
     class DeviceConnected extends AsyncTask<Object,String,Object> {
         @Override
         protected Object doInBackground(Object... objects) {
+            String str = String.format("w%s", getResources().getInteger(R.integer.window_size));
+
             try {
                 BufferedWriter stream = new BufferedWriter(new OutputStreamWriter(m_socket.getOutputStream()));
-                stream.write("w20", 0, 3);
+                stream.write(str, 0, str.length());
                 stream.flush();
             } catch (IOException err) {
                 Log.e("ConnectionFragment", "Error while sending", err);
@@ -250,7 +252,7 @@ public class ConnectionFragment extends Fragment {
             try {
                 m_stream = new BufferedReader(new InputStreamReader(m_socket.getInputStream()));
                 while (true) {
-                    String str = m_stream.readLine();
+                    str = m_stream.readLine();
                     publishProgress(str);
                 }
             } catch (IOException err) {

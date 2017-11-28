@@ -14,9 +14,13 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.BayesNet;
+import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 
@@ -32,9 +36,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
 
     // Attributes
     BluetoothAdapter m_BluetoothAdapter;
-    Classifier m_classifier;
-    WekaTask m_weka_task;
     File m_train_file;
+    WekaTask m_weka_task;
+    Classifier m_classifier;
+    boolean m_weka_ready = false;
+
+    Instances m_dataset;
+    ArrayList<Integer> m_instance = new ArrayList<>();
 
     Toolbar m_toolbar;
     TextView m_device_name;
@@ -77,8 +85,42 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
 
     @Override
     public void onReceive(String data) {
-        if (data.matches("h,(-?\\d,){6}")) {
+        final int WINDOW_SIZE = getResources().getInteger(R.integer.window_size);
+        final String[] GESTURES = getResources().getStringArray(R.array.gestures);
+
+        if (data.matches("h(,-?\\d+){6},?")) {
             m_raw_data.setText("mvt : " + data + '\n' + m_raw_data.getText());
+            if (!m_weka_ready) return;
+
+            // Add data
+            String[] ints = data.split(",");
+
+            for (int i = 1; i < 7; ++i) {
+                m_instance.add(Integer.valueOf(ints[i]));
+            }
+
+            // If have 1 mouvement
+            if (m_instance.size() == WINDOW_SIZE * 6) {
+                // Create the instance
+                double[] values = new double[m_instance.size()+1];
+                for (int i = 0; i < m_instance.size(); ++i) {
+                    values[i] = m_instance.get(i);
+                }
+                values[m_instance.size()] = -1;
+                m_instance.clear();
+
+                // Add to test data
+                DenseInstance denseInstance = new DenseInstance(1.0, values);
+                denseInstance.setDataset(m_dataset);
+
+                try {
+                    // Label it
+                    int label = (int) m_classifier.classifyInstance(denseInstance);
+                    m_raw_data.setText("mvt : " + String.valueOf(label) + " => " + m_dataset.classAttribute().value(label) + '\n' + m_raw_data.getText());
+                } catch (Exception err) {
+                    Log.e("MainActivity", "Unable to classify", err);
+                }
+            }
         } else {
             m_raw_data.setText(data + '\n' + m_raw_data.getText());
         }
@@ -86,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
 
     @Override
     public void onDisconnect() {
-
+        m_instance.clear();
     }
 
     @Override
@@ -143,12 +185,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         @Override
         protected Object doInBackground(Object... objects) {
             // Loads train file
-            Instances data;
-
             try {
                 ConverterUtils.DataSource source = new ConverterUtils.DataSource(m_train_file.getAbsolutePath());
-                data = source.getDataSet();
-                data.setClassIndex(data.numAttributes() - 1); // Last attribute => LABEL
+                m_dataset = source.getDataSet();
+                m_dataset.setClassIndex(m_dataset.numAttributes() - 1); // Last attribute => LABEL
             } catch (Exception err) {
                 Log.e("WekaTask", "Unable to load train file", err);
                 return null;
@@ -157,10 +197,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
             // Initialize classifier
             try {
                 m_classifier = new BayesNet();
-                m_classifier.buildClassifier(data);
+                m_classifier.buildClassifier(m_dataset);
             } catch (Exception err) {
                 Log.e("WekaTask", "Unable to build classifier", err);
             }
+
+            m_weka_ready = true;
 
             return null;
         }

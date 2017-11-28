@@ -113,15 +113,17 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
 
     @Override
     public void onReceive(String data) {
+        final int WINDOW_SIZE = getResources().getInteger(R.integer.window_size);
+
         if (m_train_button.isChecked()) {
             m_buffer.add(data);
 
-            if (m_buffer.size() == 20) {
+            if (m_buffer.size() == WINDOW_SIZE) {
                 try {
                     BufferedOutputStream sw = new BufferedOutputStream(new FileOutputStream(m_train_file, true));
 
                     // Write data
-                    for (int i = 0; i < 20; ++i) {
+                    for (int i = 0; i < WINDOW_SIZE; ++i) {
                         sw.write(m_buffer.get(i).substring(2).getBytes());
                     }
 
@@ -176,10 +178,12 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
 
     // Méthods
     private void initFile() throws IOException {
+        final int WINDOW_SIZE = getResources().getInteger(R.integer.window_size);
+
         // Init file
         BufferedOutputStream sw = new BufferedOutputStream(new FileOutputStream(m_train_file));
 
-        for (int i = 1; i <= 20; ++i) {
+        for (int i = 1; i <= WINDOW_SIZE; ++i) {
             sw.write(String.format("AccX%1$s,AccY%1$s,AccZ%1$s,GyrX%1$s,GyrY%1$s,GyrZ%1$s,", i).getBytes());
         }
 
