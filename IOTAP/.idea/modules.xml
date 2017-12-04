@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/IOTAP.iml" filepath="$PROJECT_DIR$/IOTAP.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.eclipse.paho.android.service-1.1.1/org.eclipse.paho.android.service-1.1.1.iml" filepath="$PROJECT_DIR$/org.eclipse.paho.android.service-1.1.1/org.eclipse.paho.android.service-1.1.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.eclipse.paho.client.mqttv3-1.1.1/org.eclipse.paho.client.mqttv3-1.1.1.iml" filepath="$PROJECT_DIR$/org.eclipse.paho.client.mqttv3-1.1.1/org.eclipse.paho.client.mqttv3-1.1.1.iml" />
       <module fileurl="file://$PROJECT_DIR$/weka-android-release/weka-android-release.iml" filepath="$PROJECT_DIR$/weka-android-release/weka-android-release.iml" />
     </modules>
   </component>

@@ -25,17 +25,26 @@
         tools:layout="@layout/connection_fragment" />
 
     <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/main_connection_manager"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@id/mqtt_button">
 
         <TextView
             android:id="@+id/raw_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </ScrollView>
+
+    <ToggleButton
+        android:id="@+id/mqtt_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

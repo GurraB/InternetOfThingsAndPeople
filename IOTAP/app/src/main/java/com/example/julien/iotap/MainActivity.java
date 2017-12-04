@@ -5,15 +5,27 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -41,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
     Classifier m_classifier;
     boolean m_weka_ready = false;
 
+    MqttAndroidClient mqtt_client;
+    int ID = 0;
+
     Instances m_dataset;
     ArrayList<Integer> m_instance = new ArrayList<>();
 
@@ -48,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
     TextView m_device_name;
     TextView m_bluetooth_status;
     TextView m_raw_data;
+    ToggleButton m_mqtt_button;
 
     ConnectionFragment m_connection_manager;
 
@@ -60,9 +76,37 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         // Get Views
         m_toolbar  = findViewById(R.id.main_toolbar);
         m_raw_data = findViewById(R.id.raw_data);
+        m_mqtt_button = findViewById(R.id.mqtt_button);
 
         // Get fragments
         m_connection_manager = (ConnectionFragment) getFragmentManager().findFragmentById(R.id.main_connection_manager);
+
+        m_mqtt_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (mqtt_client != null && mqtt_client.isConnected()) {
+                    MqttMessage msg;
+                    try {
+                        if (m_mqtt_button.isChecked()) {
+                            msg = new MqttMessage("led_on".getBytes("UTF-8"));
+                        } else {
+                            msg = new MqttMessage("led_off".getBytes("UTF-8"));
+                        }
+
+                        msg.setId(++ID);
+                        msg.setRetained(true);
+                        msg.setQos(1);
+
+                        mqtt_client.publish("led", msg);
+                    } catch (UnsupportedEncodingException err) {
+                        Log.e("MainActivity", "error !", err);
+                    } catch (MqttException err) {
+                        Log.e("MainActivity", "error !", err);
+                    }
+                }
+            }
+        });
 
         // Setup toolbar
         setSupportActionBar(m_toolbar);
@@ -76,6 +120,14 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         // Init Weka
         m_train_file = new File(getFilesDir(), TrainActivity.TRAIN_FILE);
         if (m_train_file.exists()) initWeka();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Get Mqtt Client
+        mqtt_client = getMqttClient("tcp://m23.cloudmqtt.com:10691", "AndroidApp");
     }
 
     @Override
@@ -170,6 +222,63 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
     }
 
     // Méthods
+    private MqttConnectOptions getMqttConnectionOption() {
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+        mqttConnectOptions.setCleanSession(false);
+        mqttConnectOptions.setAutomaticReconnect(true);
+        //mqttConnectOptions.setWill(Constants.PUBLISH_TOPIC, "I am going offline".getBytes(), 1, true);
+        mqttConnectOptions.setUserName("vhsqtfmb");
+        mqttConnectOptions.setPassword("dta6g6s1LUWA".toCharArray());
+        return mqttConnectOptions;
+    }
+
+    private DisconnectedBufferOptions getDisconnectedBufferOptions() {
+        DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
+        disconnectedBufferOptions.setBufferEnabled(true);
+        disconnectedBufferOptions.setBufferSize(100);
+        disconnectedBufferOptions.setPersistBuffer(true);
+        disconnectedBufferOptions.setDeleteOldestMessages(false);
+        return disconnectedBufferOptions;
+    }
+
+    public MqttAndroidClient getMqttClient(String brokerUrl, String clientId) {
+        final MqttAndroidClient mqttAndroidClient = new MqttAndroidClient(this, brokerUrl, clientId);
+
+        try {
+            IMqttToken token = mqttAndroidClient.connect(getMqttConnectionOption());
+            token.setActionCallback(new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    mqttAndroidClient.setBufferOpts(getDisconnectedBufferOptions());
+                    Log.d("MainActivity", "Success");
+
+                    try {
+                        MqttMessage msg = new MqttMessage("led_off".getBytes("UTF-8"));
+
+                        msg.setId(++ID);
+                        msg.setRetained(true);
+                        msg.setQos(1);
+
+                        mqttAndroidClient.publish("led", msg);
+                    } catch (UnsupportedEncodingException err) {
+                        Log.e("MainActivity", "error !", err);
+                    } catch (MqttException err) {
+                        Log.e("MainActivity", "error !", err);
+                    }
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Log.d("MainActivity", "Failure", exception);
+                }
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+
+        return mqttAndroidClient;
+    }
+
     void initWeka() {
         if (m_weka_task != null) return;
         if (!m_train_file.exists()) return;
