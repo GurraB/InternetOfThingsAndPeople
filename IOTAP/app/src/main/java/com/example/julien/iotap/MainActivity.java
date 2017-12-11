@@ -84,26 +84,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         m_mqtt_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (mqtt_client != null && mqtt_client.isConnected()) {
-                    MqttMessage msg;
-                    try {
-                        if (m_mqtt_button.isChecked()) {
-                            msg = new MqttMessage("led_on".getBytes("UTF-8"));
-                        } else {
-                            msg = new MqttMessage("led_off".getBytes("UTF-8"));
-                        }
-
-                        msg.setId(++ID);
-                        msg.setRetained(true);
-                        msg.setQos(1);
-
-                        mqtt_client.publish("led", msg);
-                    } catch (UnsupportedEncodingException err) {
-                        Log.e("MainActivity", "error !", err);
-                    } catch (MqttException err) {
-                        Log.e("MainActivity", "error !", err);
-                    }
+                if (m_mqtt_button.isChecked()) {
+                    publish("led_on");
+                } else {
+                    publish("led_off");
                 }
             }
         });
@@ -169,6 +153,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                     // Label it
                     int label = (int) m_classifier.classifyInstance(denseInstance);
                     m_raw_data.setText("mvt : " + String.valueOf(label) + " => " + m_dataset.classAttribute().value(label) + '\n' + m_raw_data.getText());
+
+                    publish(m_dataset.classAttribute().value(label));
                 } catch (Exception err) {
                     Log.e("MainActivity", "Unable to classify", err);
                 }
@@ -249,22 +235,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
             token.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    mqttAndroidClient.setBufferOpts(getDisconnectedBufferOptions());
-                    Log.d("MainActivity", "Success");
-
-                    try {
-                        MqttMessage msg = new MqttMessage("led_off".getBytes("UTF-8"));
-
-                        msg.setId(++ID);
-                        msg.setRetained(true);
-                        msg.setQos(1);
-
-                        mqttAndroidClient.publish("led", msg);
-                    } catch (UnsupportedEncodingException err) {
-                        Log.e("MainActivity", "error !", err);
-                    } catch (MqttException err) {
-                        Log.e("MainActivity", "error !", err);
-                    }
+                    //publish("led_off");
                 }
 
                 @Override
@@ -277,6 +248,25 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         }
 
         return mqttAndroidClient;
+    }
+
+    void publish(String str) {
+        if (mqtt_client != null && mqtt_client.isConnected()) {
+            MqttMessage msg;
+            try {
+                msg = new MqttMessage(str.getBytes("UTF-8"));
+
+                msg.setId(++ID);
+                msg.setRetained(true);
+                msg.setQos(1);
+
+                mqtt_client.publish("led", msg);
+            } catch (UnsupportedEncodingException err) {
+                Log.e("MainActivity", "error !", err);
+            } catch (MqttException err) {
+                Log.e("MainActivity", "error !", err);
+            }
+        }
     }
 
     void initWeka() {
@@ -312,6 +302,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
             }
 
             m_weka_ready = true;
+            m_weka_task = null;
 
             return null;
         }
