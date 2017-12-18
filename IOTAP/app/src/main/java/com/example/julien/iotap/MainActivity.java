@@ -5,16 +5,13 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
@@ -27,11 +24,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.BayesNet;
-import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
@@ -63,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
     TextView m_device_name;
     TextView m_bluetooth_status;
     TextView m_raw_data;
-    ToggleButton m_mqtt_button;
 
     ConnectionFragment m_connection_manager;
 
@@ -76,21 +70,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         // Get Views
         m_toolbar  = findViewById(R.id.main_toolbar);
         m_raw_data = findViewById(R.id.raw_data);
-        m_mqtt_button = findViewById(R.id.mqtt_button);
 
         // Get fragments
         m_connection_manager = (ConnectionFragment) getFragmentManager().findFragmentById(R.id.main_connection_manager);
-
-        m_mqtt_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (m_mqtt_button.isChecked()) {
-                    publish("led_on");
-                } else {
-                    publish("led_off");
-                }
-            }
-        });
 
         // Setup toolbar
         setSupportActionBar(m_toolbar);
@@ -125,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         final String[] GESTURES = getResources().getStringArray(R.array.gestures);
 
         if (data.matches("h(,-?\\d+){6},?")) {
+            Log.d("MainActivity", "mvt : " + data);
             m_raw_data.setText("mvt : " + data + '\n' + m_raw_data.getText());
             if (!m_weka_ready) return;
 
@@ -152,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                 try {
                     // Label it
                     int label = (int) m_classifier.classifyInstance(denseInstance);
+                    Log.d("MainActivity", "mvt : " + String.valueOf(label) + " => " + m_dataset.classAttribute().value(label));
                     m_raw_data.setText("mvt : " + String.valueOf(label) + " => " + m_dataset.classAttribute().value(label) + '\n' + m_raw_data.getText());
 
                     publish(m_dataset.classAttribute().value(label));
@@ -160,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                 }
             }
         } else {
+            Log.d("MainActivity", data);
             m_raw_data.setText(data + '\n' + m_raw_data.getText());
         }
     }

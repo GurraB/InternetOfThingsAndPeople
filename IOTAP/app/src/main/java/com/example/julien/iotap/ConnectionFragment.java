@@ -251,6 +251,7 @@ public class ConnectionFragment extends Fragment {
 
             try {
                 m_stream = new BufferedReader(new InputStreamReader(m_socket.getInputStream()));
+
                 while (true) {
                     str = m_stream.readLine();
                     publishProgress(str);
