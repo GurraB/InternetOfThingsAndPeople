@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         final String[] GESTURES = getResources().getStringArray(R.array.gestures);
 
         if (data.matches("h(,-?\\d+){6},?")) {
-            Log.d("MainActivity", "mvt : " + data);
             m_raw_data.setText("mvt : " + data + '\n' + m_raw_data.getText());
             if (!m_weka_ready) return;
 
@@ -135,7 +134,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                 try {
                     // Label it
                     int label = (int) m_classifier.classifyInstance(denseInstance);
-                    Log.d("MainActivity", "mvt : " + String.valueOf(label) + " => " + m_dataset.classAttribute().value(label));
                     m_raw_data.setText("mvt : " + String.valueOf(label) + " => " + m_dataset.classAttribute().value(label) + '\n' + m_raw_data.getText());
 
                     publish(m_dataset.classAttribute().value(label));
@@ -144,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                 }
             }
         } else {
-            Log.d("MainActivity", data);
             m_raw_data.setText(data + '\n' + m_raw_data.getText());
         }
     }

@@ -115,7 +115,12 @@ public class TrainActivity extends AppCompatActivity implements ConnectionFragme
     public void onReceive(String data) {
         final int WINDOW_SIZE = getResources().getInteger(R.integer.window_size);
 
-        if (m_train_button.isChecked()) {
+        // clean
+        while ((!data.startsWith("h")) && (data.length() > 0)) {
+            data = data.substring(1);
+        }
+
+        if (data.matches("h(,-?\\d+){6},?") && m_train_button.isChecked()) {
             m_buffer.add(data);
 
             if (m_buffer.size() == WINDOW_SIZE) {
