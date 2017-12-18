@@ -29,7 +29,7 @@
         <item>tilt right</item>
         <item>tilt left</item>
         <item>clockwise</item>
-        <item>counter-clockwise</item>
+        <item>notClockwise</item>
     </string-array>
 
     <!-- Actions -->
