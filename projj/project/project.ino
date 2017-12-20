@@ -5,12 +5,12 @@ const int ECHO_PIN = D1;
 
 const unsigned int MAX_DIST = 23200;
 
-const char* ssid = "OnePlus3T";
-const char* password =  "hjfav123";
+const char* ssid = "wifi";
+const char* password =  "pass";
 const char* mqttServer = "m23.cloudmqtt.com";
-const int mqttPort = 10691;
-const char* mqttUser = "vhsqtfmb";
-const char* mqttPassword = "dta6g6s1LUWA";
+const int mqttPort = 1;
+const char* mqttUser = "username";
+const char* mqttPassword = "password";
 int led_up = 3, led_down = 4, led_right = 5, led_left = 6, led_tilt_right = 7, led_tilt_left = 8;
 const char* dancemoves[] = {"up", "down", "right", "left", "tilt right", "tilt left", "clockwise"};
 unsigned long t1 = 0;
