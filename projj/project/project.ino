@@ -5,14 +5,14 @@ const int ECHO_PIN = D1;
 
 const unsigned int MAX_DIST = 23200;
 
-const char* ssid = "wifi";
-const char* password =  "pass";
-const char* mqttServer = "m23.cloudmqtt.com";
-const int mqttPort = 1;
-const char* mqttUser = "username";
-const char* mqttPassword = "password";
+const char* ssid = "*****";
+const char* password =  "*****";
+const char* mqttServer = "m14.cloudmqtt.com";
+const int mqttPort = 14052;
+const char* mqttUser = "*****";
+const char* mqttPassword = "*******";
 int led_up = 3, led_down = 4, led_right = 5, led_left = 6, led_tilt_right = 7, led_tilt_left = 8;
-const char* dancemoves[] = {"up", "down", "right", "left", "tilt right", "tilt left", "clockwise"};
+const char* dancemoves[] = {"up", "down", "right", "left", "tilt right", "tilt left", "clockwise","notClockwise"};
 unsigned long t1 = 0;
 unsigned long t2 = 0;
 unsigned long t3 = 0;
@@ -26,6 +26,7 @@ PubSubClient client(espClient);
 int d1 = 5;
 int d2 = 4;
 int d3 = 2;
+String activeUser;
 
 void setup() {
   pinMode(TRIG_PIN, OUTPUT);
@@ -52,7 +53,7 @@ void setup() {
   while (!client.connected()) {
     Serial.println("Connecting to MQTT...");
  
-    if (client.connect("ESP8266Client", mqttUser, mqttPassword )) {
+    if (client.connect("ESP8266ClientPRO", mqttUser, mqttPassword )) {
  
       Serial.println("connected");  
  
@@ -65,7 +66,8 @@ void setup() {
   attachInterrupt(15, echo_high, RISING);
   attachInterrupt(13, echo_low, FALLING);
   reset();
-  client.subscribe("led");
+  client.subscribe("esp/test");
+  client.publish("esp/test", "anton is dork");
 }
 
 void loop() {
@@ -85,8 +87,8 @@ void echo_high() {
 void echo_low() {
   t2 = micros();
   pulse_width = t2 - t1;
-  Serial.print("cm: ");
-  Serial.println(pulse_width / 58.0);
+  //Serial.print("cm: ");
+  //Serial.println(pulse_width / 58.0);
   if ((pulse_width / 58.0) < 50) {
     active = true;
   } else {
@@ -101,31 +103,36 @@ void reset() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.println("callback");
   float cm;
   float inches;
+  String currentUser;
   String message;
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length-1; i++) {
     message += (char)payload[i];
   }
+  currentUser = (char)payload[length-1];
   Serial.print("message: ");
   Serial.println(message);
+  Serial.print("User: ");
+  Serial.println(currentUser);
   reset();
   delayMicroseconds(100);
   if (active) {
     Serial.println("is active yes");
     if (message == dancemoves[0] && !locked) {
       digitalWrite(d1, HIGH);
-    } else if (message == dancemoves[1] && !locked) {
+    } else if (message == dancemoves[1] && !locked && activeUser == currentUser) {
       digitalWrite(d2, HIGH);
-    } else if (message == dancemoves[2] && !locked) {
+    } else if (message == dancemoves[2] && !locked && activeUser == currentUser) {
       digitalWrite(d1, HIGH);
       digitalWrite(d2, HIGH);
-    } else if (message == dancemoves[3] && !locked) {
+    } else if (message == dancemoves[3] && !locked && activeUser == currentUser) {
       digitalWrite(d3, HIGH);
-    } else if (message == dancemoves[4] && !locked) {
+    } else if (message == dancemoves[4] && !locked && activeUser == currentUser) {
       digitalWrite(d3, HIGH);
       digitalWrite(d1, HIGH);
-    } else if (message == dancemoves[5] && !locked) {
+    } else if (message == dancemoves[5] && !locked && activeUser == currentUser) {
       digitalWrite(d3, HIGH);
       digitalWrite(d2, HIGH);
     } else if(message == dancemoves[6]) {
@@ -153,7 +160,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
       digitalWrite(d2, LOW);
       digitalWrite(d3, LOW);
       locked = false;
-    }
+      activeUser = currentUser;
+    } 
   } else {
     locked = true;
   }
