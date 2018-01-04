@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         super.onStart();
 
         // Get Mqtt Client
-        mqtt_client = getMqttClient("tcp://m23.cloudmqtt.com:10691", "AndroidApp");
+        mqtt_client = getMqttClient("tcp://m14.cloudmqtt.com:14052", "AndroidApp");
     }
 
     @Override
@@ -104,10 +104,19 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
     @Override
     public void onReceive(String data) {
         final int WINDOW_SIZE = getResources().getInteger(R.integer.window_size);
-        final String[] GESTURES = getResources().getStringArray(R.array.gestures);
 
         if (data.matches("h(,-?\\d+){6},?")) {
-            m_raw_data.setText("mvt : " + data + '\n' + m_raw_data.getText());
+            // Limit size to 100 lines
+            String text = m_raw_data.getText().toString();
+            String[] array = text.split("\n");
+            StringBuilder new_text = new StringBuilder("mvt : " + data);
+            int size = 100 < array.length ? 100 : array.length;
+
+            for (int i = 0; i < size; ++i) {
+                new_text.append("\n" + array[i]);
+            }
+
+            m_raw_data.setText(new_text.toString());
             if (!m_weka_ready) return;
 
             // Add data
@@ -142,7 +151,17 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
                 }
             }
         } else {
-            m_raw_data.setText(data + '\n' + m_raw_data.getText());
+            // Limit size to 100 lines
+            String text = m_raw_data.getText().toString();
+            String[] array = text.split("\n");
+            StringBuilder new_text = new StringBuilder(data);
+            int size = 100 < array.length ? 100 : array.length;
+
+            for (int i = 0; i < size; ++i) {
+                new_text.append("\n" + array[i]);
+            }
+
+            m_raw_data.setText(new_text.toString());
         }
     }
 
@@ -195,8 +214,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         mqttConnectOptions.setCleanSession(false);
         mqttConnectOptions.setAutomaticReconnect(true);
         //mqttConnectOptions.setWill(Constants.PUBLISH_TOPIC, "I am going offline".getBytes(), 1, true);
-        mqttConnectOptions.setUserName("vhsqtfmb");
-        mqttConnectOptions.setPassword("dta6g6s1LUWA".toCharArray());
+        mqttConnectOptions.setUserName("xkzzytzh");
+        mqttConnectOptions.setPassword("m4bsF-0P2_vD".toCharArray());
         return mqttConnectOptions;
     }
 
@@ -236,13 +255,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionFragmen
         if (mqtt_client != null && mqtt_client.isConnected()) {
             MqttMessage msg;
             try {
-                msg = new MqttMessage(str.getBytes("UTF-8"));
+                msg = new MqttMessage((str + "0").getBytes("UTF-8"));
 
                 msg.setId(++ID);
                 msg.setRetained(true);
                 msg.setQos(1);
 
-                mqtt_client.publish("led", msg);
+                mqtt_client.publish("esp/test", msg);
             } catch (UnsupportedEncodingException err) {
                 Log.e("MainActivity", "error !", err);
             } catch (MqttException err) {
